@@ -4,7 +4,7 @@ namespace proyecto\Response;
 class Success extends Response {
 
 function __construct($data = NULL){
-	$this->message = 'success';
+	$this->message = 'Si jaló, tilín :D';
 	$this->data = $data;
 }//
 

@@ -15,17 +15,15 @@ class Table
     }
     static  function getDataconexion(){
 
-
-
-
+        
 }
     static function query($query)
     {
-        $cc = new  Conexion("web", "localhost", "root", "");
+        $cc = new  Conexion("mrtacotrc", "localhost", "root", "12345678");
         self::$pdo = $cc->getPDO();
         $stmt = self::$pdo->query($query);
         $resultados = $stmt->fetchAll(PDO::FETCH_OBJ);
         return $resultados;
     }
-
+    
 }
