@@ -4,6 +4,7 @@ namespace proyecto;
 require("../vendor/autoload.php");
 
 use proyecto\Controller\crearPersonaController;
+use proyecto\Controller\ClientesController;
 use proyecto\Models\User;
 use proyecto\Response\Failure;
 use proyecto\Response\Success;
@@ -31,6 +32,20 @@ use proyecto\Models\DetallePedido;
 
 // Agregar ruta para registrar persona y mesero
 Router::post('/register', [EmpleadosController::class, 'register']);
+
+Router::post('/crearcliente', function() {
+    // Obtener los datos del cuerpo de la solicitud
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    // Crear instancia del controlador
+    $controller = new ClientesController();
+
+    // Llamar al método register con los datos
+    $message = $controller->register($data);
+
+    // Devolver la respuesta
+    echo json_encode(["message" => $message]);
+});
 
 Router::get('/prueba',[crearPersonaController::class,"prueba"]);
 Router::get('/usuarios',[Usuarios::class,"mostrarUsuarios"]);

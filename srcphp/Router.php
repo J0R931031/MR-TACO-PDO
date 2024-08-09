@@ -8,6 +8,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\key;
 use proyecto\Response\Failure;
 
+
 class Router
 {
     public static function get($route, $path_to_include)

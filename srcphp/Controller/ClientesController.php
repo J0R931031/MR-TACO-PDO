@@ -2,71 +2,42 @@
 
 namespace proyecto\Controller;
 
-use proyecto\Models\Personas;
-use proyecto\Models\Clientes;
-use proyecto\Response\Success;
-use proyecto\Response\Failure;
+use PDO;
+use proyecto\Conexion;
+use proyecto\Exception;
 
-class ClientesController {
-    public function register() {
-        $JSONData = file_get_contents("php://input");
-        $dataObject = json_decode($JSONData);
+class ClientesController
+{
+    protected $pdo;
 
-        // Validar que todos los campos requeridos están presentes
-        if (!isset($dataObject->ID_P, $dataObject->Nombre, $dataObject->ApellidoPaterno, $dataObject->ApellidoMaterno, $dataObject->Sexo, $dataObject->Telefono, $dataObject->FechaNacimiento, $dataObject->Edad, $dataObject->UsuarioID, $dataObject->ID_Cliente, $dataObject->FechaDeRegistro)) {
-            return (new Failure(400, "Datos incompletos"))->Send();
-        }
+    public function __construct()
+    {
+        $cc = new Conexion("mrtacotrc", "localhost", "root", "12345678");
+        $this->pdo = $cc->getPDO();
+    }
 
-        // Crear nueva persona
-        $newPersona = Personas::create([
-            'ID_P' => $dataObject->ID_P,
-            'Nombre' => $dataObject->Nombre,
-            'ApellidoPaterno' => $dataObject->ApellidoPaterno,
-            'ApellidoMaterno' => $dataObject->ApellidoMaterno,
-            'Sexo' => $dataObject->Sexo,
-            'Telefono' => $dataObject->Telefono,
-            'FechaNacimiento' => $dataObject->FechaNacimiento,
-            'Edad' => $dataObject->Edad,
-            'UsuarioID' => $dataObject->UsuarioID,
-        ]);
-
-        if (!$newPersona) {
-            return (new Failure(500, "Error al crear la persona"))->Send();
-        }
-
-        // Crear nuevo cliente
-        $newCliente = Clientes::create([
-            'ID_Cliente' => $dataObject->ID_Cliente,
-            'FechaDeRegistro' => $dataObject->FechaDeRegistro,
-            'PersonaID' => $newPersona->ID_P,
-        ]);
-
-        // Llamar al procedimiento almacenado para registrar a la persona
-        $query = "CALL RegistrarPersonaLogin(
-            '$nombre', 
-            '$apellidos', 
-            '$fechaNacimiento', 
-            '$sexo', 
-            '$correo', 
-            '$telefono', 
-        )";
-
-        // Ejecutar la consulta
+    public function register($data)
+    {
         try {
-            $resultados = Table::query($query);
-            $r = new Success(['success' => true, 'message' => 'Registro exitoso']);
-            return $r->send();
-        } catch (\Exception $e) 
-        {
-            echo json_encode(['success' => false, 'message' => 'Error en el registro: ' . $e->getMessage()]);
-            return;
-        }
+            $stmt = $this->pdo->prepare("CALL RegisterClient(:nombre, :apellidoPaterno, :apellidoMaterno, :sexo, :telefono, :fechaNacimiento, :correo, :contrasena, @message)");
+            $stmt->bindParam(':nombre', $data['nombre']);
+            $stmt->bindParam(':apellidoPaterno', $data['apellidoPaterno']);
+            $stmt->bindParam(':apellidoMaterno', $data['apellidoMaterno']);
+            $stmt->bindParam(':sexo', $data['sexo']);
+            $stmt->bindParam(':telefono', $data['telefono']);
+            $stmt->bindParam(':fechaNacimiento', $data['fechaNacimiento']);
+            $stmt->bindParam(':correo', $data['correo']);
+            $stmt->bindParam(':contrasena', $data['contrasena']);
 
-        if (!$newCliente) {
-            return (new Failure(500, "Error al crear el cliente"))->Send();
+            $stmt->execute();
+
+            $outputStmt = $this->pdo->query("SELECT @message")->fetch(PDO::FETCH_ASSOC);
+            $message = $outputStmt['@message'];
+
+            return $message;
+
+        } catch (\PDOException $e) {
+            return "Error: " . $e->getMessage();
         }
-
-        return (new Success($newCliente))->Send();
     }
 }
-
