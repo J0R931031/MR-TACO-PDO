@@ -19,7 +19,7 @@ class Table
 }
     static function query($query)
     {
-        $cc = new  Conexion("mrtacotrc", "localhost", "root", "12345678");
+        $cc = new  Conexion("mrtacotrc", "localhost", "root", "1234");
         self::$pdo = $cc->getPDO();
         $stmt = self::$pdo->query($query);
         $resultados = $stmt->fetchAll(PDO::FETCH_OBJ);

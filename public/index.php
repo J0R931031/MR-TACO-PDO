@@ -5,6 +5,7 @@ require("../vendor/autoload.php");
 
 use proyecto\Controller\crearPersonaController;
 use proyecto\Controller\ClientesController;
+use proyecto\Controller\EmpleadosController;
 use proyecto\Models\User;
 use proyecto\Response\Failure;
 use proyecto\Response\Success;
