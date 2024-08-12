@@ -19,7 +19,17 @@ class ClientesController
     public function register($data)
     {
         try {
-            $stmt = $this->pdo->prepare("CALL RegisterClient(:nombre, :apellidoPaterno, :apellidoMaterno, :sexo, :telefono, :fechaNacimiento, :correo, :contrasena, @message)");
+            $stmt = $this->pdo->prepare
+            ("CALL RegisterClient
+            (:nombre,
+             :apellidoPaterno, 
+             :apellidoMaterno, 
+             :sexo, 
+             :telefono, 
+             :fechaNacimiento, 
+             :correo, 
+             :contrasena, 
+             @message)");
             $stmt->bindParam(':nombre', $data['nombre']);
             $stmt->bindParam(':apellidoPaterno', $data['apellidoPaterno']);
             $stmt->bindParam(':apellidoMaterno', $data['apellidoMaterno']);

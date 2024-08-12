@@ -69,7 +69,6 @@ Router::get('/ordenes',[Ordenes::class,"mostrarOrdenes"]);
 Router::get('/detalleorden',[DetalleOrden::class,"mostrarDetalleOrden"]);
 Router::get('/pedidos',[Pedidos::class,"mostrarPedidos"]);
 Router::get('/detallepedido',[DetallePedido::class,"mostrarDetallePedido"]);
-Router::get('/crearcliente', [ClientesController::class, 'register']);
 
 Router::get('/usuario/buscar/$id', function ($id) {
     $user = User::find($id);
@@ -81,7 +80,6 @@ Router::get('/usuario/buscar/$id', function ($id) {
     return $r->Send();
 });
 
-Router::get('/respuesta', [crearPersonaController::class, "response"]);
 Router::any('/404', '../views/404.php');
 
 route::get ("/p", function(){
