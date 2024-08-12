@@ -3,69 +3,48 @@
 namespace proyecto\Controller;
 
 use proyecto\Models\Personas;
-use proyecto\Models\Meseros;
+use proyecto\Models\Usuarios;
 use proyecto\Models\Chefs;
+use proyecto\Models\Meseros;
 use proyecto\Response\Success;
 use proyecto\Response\Failure;
 
 class EmpleadosController {
-    public function register() {
-        $JSONData = file_get_contents("php://input");
-        $dataObject = json_decode($JSONData);
+    public function registrarcliente() {
+        try {
+            $JSONData = file_get_contents("php://input");
+            $dataObject = json_decode($JSONData); // Corregido a $dataObject
+    
+            // Crear el objeto usuario
+            $newusuario = new Usuarios();
+            $newusuario->ID_U = $dataObject->ID_U;
+            $newusuario->Correo = $dataObject->Correo;
+            $newusuario->Contrasena = password_hash($dataObject->Contrasena, PASSWORD_DEFAULT);
+    
+            // Guardar el nuevo usuario para obtener su ID
+            $newusuario->save();
+    
+            // Crear el objeto persona
+            $newpersona = new Personas();
+            $newpersona->ID_P = $dataObject->ID_P;
+            $newpersona->Nombre = $dataObject->Nombre;
+            $newpersona->ApellidoPaterno = $dataObject->ApellidoPaterno;
+            $newpersona->ApellidoMaterno = $dataObject->ApellidoMaterno;
+            $newpersona->Sexo = $dataObject->Sexo;
+            $newpersona->Telefono = $dataObject->Telefono;
+            $newpersona->FechaNacimiento = $dataObject->FechaNacimiento;
+            $newpersona->Edad = $dataObject->Edad;
+            $newpersona->UsuarioID = $newusuario->ID_U; // Asegúrate de que $newusuario tenga un ID asignado
+            $newpersona->save();
+    
+            // Obtener el ID de la nueva persona guardada
 
-        // Validar que todos los campos requeridos están presentes
-        if (!isset($dataObject->ID_P, $dataObject->Nombre, $dataObject->ApellidoPaterno, $dataObject->ApellidoMaterno, $dataObject->Sexo, $dataObject->Telefono, $dataObject->Direccion, $dataObject->FechaNacimiento, $dataObject->Edad, $dataObject->UsuarioID)) {
-            return (new Failure(400, "Datos incompletos"))->Send();
+    
+            // Devolver la respuesta de éxito
+            return (new Success($newpersona))->Send();
+    
+        } catch (Exception $e) {
+            return (new Error($e->getMessage()))->Send();
         }
-
-        // Crear nueva persona
-        $newPersona = Personas::create([
-            'ID_P' => $dataObject->ID_P,
-            'Nombre' => $dataObject->Nombre,
-            'ApellidoPaterno' => $dataObject->ApellidoPaterno,
-            'ApellidoMaterno' => $dataObject->ApellidoMaterno,
-            'Sexo' => $dataObject->Sexo,
-            'Telefono' => $dataObject->Telefono,
-            'Direccion' => $dataObject->Direccion,
-            'FechaNacimiento' => $dataObject->FechaNacimiento,
-            'Edad' => $dataObject->Edad,
-            'UsuarioID' => $dataObject->UsuarioID,
-        ]);
-
-        if (!$newPersona) {
-            return (new Failure(500, "Error al crear la persona"))->Send();
-        }
-
-        // Verificar si es mesero
-        if (isset($dataObject->ID_Mesero, $dataObject->FechaRegistro)) {
-            $newMesero = Meseros::create([
-                'ID_Mesero' => $dataObject->ID_Mesero,
-                'FechaRegistro' => $dataObject->FechaRegistro,
-                'PersonaID' => $newPersona->ID_P,
-            ]);
-
-            if (!$newMesero) {
-                return (new Failure(500, "Error al crear el mesero"))->Send();
-            }
-
-            return (new Success($newMesero))->Send();
-        }
-
-        // Verificar si es chef
-        if (isset($dataObject->ID_Chef, $dataObject->FechaDeRegistro)) {
-            $newChef = Chefs::create([
-                'ID_Chef' => $dataObject->ID_Chef,
-                'FechaDeRegistro' => $dataObject->FechaDeRegistro,
-                'PersonaID' => $newPersona->ID_P,
-            ]);
-
-            if (!$newChef) {
-                return (new Failure(500, "Error al crear el chef"))->Send();
-            }
-
-            return (new Success($newChef))->Send();
-        }
-
-        return (new Failure(400, "Tipo de empleado no especificado"))->Send();
     }
 }

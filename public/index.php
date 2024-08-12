@@ -32,7 +32,7 @@ use proyecto\Models\DetallePedido;
 
 
 // Agregar ruta para registrar persona y mesero
-Router::post('/register', [EmpleadosController::class, 'register']);
+Router::post('/register', [EmpleadosController::class, 'registrarcliente']);
 
 Router::post('/crearcliente', function() {
     // Obtener los datos del cuerpo de la solicitud
@@ -82,6 +82,6 @@ Router::get('/usuario/buscar/$id', function ($id) {
 
 Router::any('/404', '../views/404.php');
 
-route::get ("/p", function(){
+Router::get ("/p", function(){
     echo "Hola";
 });
