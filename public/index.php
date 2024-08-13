@@ -28,10 +28,24 @@ use proyecto\Models\Ordenes;
 use proyecto\Models\DetalleOrden;
 use proyecto\Models\Pedidos;
 use proyecto\Models\DetallePedido;
+use proyecto\Controller\EmpleadosController;
 
+// Otras rutas y configuraciones...
 
-// Agregar ruta para registrar persona y mesero
-Router::post('/register', [EmpleadosController::class, 'register']);
+// Ruta para registrar un empleado
+Router::post('/register', function() {
+    // Obtener los datos del cuerpo de la solicitud
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    // Crear instancia del controlador
+    $controller = new EmpleadosController();
+
+    // Llamar al método register con los datos
+    $response = $controller->register($data);
+
+    // Devolver la respuesta
+    echo json_encode($response);
+});
 
 Router::post('/crearcliente', function() {
     // Obtener los datos del cuerpo de la solicitud
