@@ -71,7 +71,6 @@ Router::get('/estadodereservas',[EstadoDeReservas::class,"mostrarEstadoDeReserva
 Router::get('/comentarios',[Comentarios::class,"mostrarComentarios"]);
 Router::get('/chefs',[Chefs::class,"mostrarChefs"]);
 Router::get('/clientes',[Clientes::class,"mostrarClientes"]);
-Router::get('/meseros',[Meseros::class,"mostrarMeseros"]);
 Router::get('/categorias',[Categorias::class,"mostrarCategorias"]);
 Router::get('/comida',[Comida::class,"mostrarComida"]);
 Router::get('/ingredientes',[Ingredientes::class,"mostrarIngredientes"]);
