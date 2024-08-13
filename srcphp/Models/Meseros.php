@@ -5,7 +5,7 @@ use proyecto\Response\Success;
 
 class Meseros extends Models
 {
-    protected $filleable = ["ID_Mesero", "FechaRegistro", "PersonaID"];
+    protected $filleable = ["ID_Mesero", "PersonaID","Direccion","CURP","RFC"];
     protected $table = "Meseros";
 
     public function mostrarMeseros() 

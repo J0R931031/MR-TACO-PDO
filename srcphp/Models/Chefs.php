@@ -5,7 +5,7 @@ use proyecto\Response\Success;
 
 class Chefs extends Models
 {
-    protected $filleable = ["ID_Chef", "FechaDeRegistro", "PersonaID"];
+    protected $filleable = ["ID_Chef", "PersonaID","Direccion","CURP","RFC"];
     protected $table = "Chefs";
 
     public function mostrarChefs() 

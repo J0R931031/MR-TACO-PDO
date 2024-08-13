@@ -6,7 +6,7 @@ use proyecto\Response\Success;
 class Usuarios extends Models
 {
    
-    protected $filleable = ["ID_U", "Correo", "Contraseña", "FechaRegistro"];
+    protected $filleable = ["ID_U", "Correo", "Contrasena",];
     protected $table = "Usuarios";
 
     public function mostrarUsuarios() 

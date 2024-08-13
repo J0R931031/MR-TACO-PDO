@@ -6,13 +6,11 @@ use proyecto\Response\Success;
 class Personas extends Models
 {
     protected $filleable = [
-        "ID_P", 
         "Nombre", 
         "ApellidoPaterno", 
         "ApellidoMaterno", 
         "Sexo", 
         "Telefono", 
-        "Direccion", 
         "FechaNacimiento", 
         "Edad", 
         "UsuarioID"];
