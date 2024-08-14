@@ -3,6 +3,15 @@
 namespace proyecto;
 require("../vendor/autoload.php");
 
+// Configurar CORS al inicio del archivo de rutas
+header("Access-Control-Allow-Origin: *"); // Permitir todos los orígenes
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS"); // Permitir métodos específicos
+header("Access-Control-Allow-Headers: Content-Type, Authorization"); // Permitir ciertos encabezados
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit(0); // Terminar script para solicitudes pre-flight
+}
+
 use proyecto\Controller\crearPersonaController;
 use proyecto\Controller\ClientesController;
 use proyecto\Models\User;
@@ -60,6 +69,33 @@ Router::post('/crearcliente', function() {
     // Devolver la respuesta
     echo json_encode(["message" => $message]);
 });
+
+Router::get('/chefs', function() {
+    $controller = new ChefsController();
+    $chefs = $controller->getChefsInfo();
+    echo json_encode($chefs);
+});
+
+Router::get('/meseros', function() {
+    $controller = new MeserosController();
+    $meseros = $controller->getMeserosInfo();
+    echo json_encode($meseros);
+});
+
+Router::get('/verificarcorreo', function() {
+    $correo = $_GET['correo'];
+    
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM USUARIOS WHERE Correo = ?");
+    $stmt->execute([$correo]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result['count'] > 0) {
+        echo json_encode(['exists' => true]);
+    } else {
+        echo json_encode(['exists' => false]);
+    }
+});
+
 
 Router::get('/prueba',[crearPersonaController::class,"prueba"]);
 Router::get('/usuarios',[Usuarios::class,"mostrarUsuarios"]);

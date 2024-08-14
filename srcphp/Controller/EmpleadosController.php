@@ -19,7 +19,20 @@ class EmpleadosController
     public function register($data)
     {
         try {
-            $stmt = $this->pdo->prepare("CALL RegisterEmployee(:nombre, :apellidoPaterno, :apellidoMaterno, :sexo, :telefono, :fechaNacimiento, :direccion, :CURP, :RFC, :correo, :contrasena, :rolID, @message)");
+            $stmt = $this->pdo->prepare("CALL RegisterEmployee(
+            :nombre, 
+            :apellidoPaterno, 
+            :apellidoMaterno, 
+            :sexo, 
+            :telefono, 
+            :fechaNacimiento, 
+            :direccion, 
+            :CURP,
+            :RFC, 
+            :correo, 
+            :contrasena, 
+            :rolID, 
+            @message)");
             $stmt->bindParam(':nombre', $data['nombre']);
             $stmt->bindParam(':apellidoPaterno', $data['apellidoPaterno']);
             $stmt->bindParam(':apellidoMaterno', $data['apellidoMaterno']);

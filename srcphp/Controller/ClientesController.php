@@ -16,6 +16,19 @@ class ClientesController
         $this->pdo = $cc->getPDO();
     }
 
+    
+    public function checkEmailExists($email)
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) AS count FROM usuarios WHERE correo = ?");
+            $stmt->execute([$email]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] > 0;
+        } catch (\PDOException $e) {
+            return false; // O manejar el error de otra manera
+        }
+    }
+
     public function register($data)
     {
         try {
