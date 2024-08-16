@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 use proyecto\Controller\crearPersonaController;
 use proyecto\Controller\ClientesController;
+use proyecto\Controller\ChefsController;
+use proyecto\Controller\MeserosController;
 use proyecto\Models\User;
 use proyecto\Response\Failure;
 use proyecto\Response\Success;
@@ -24,9 +26,7 @@ use proyecto\Models\Personas;
 use proyecto\Models\Horarios;
 use proyecto\Models\EstadoDeReservas;
 use proyecto\Models\Comentarios;
-use proyecto\Models\Chefs;
 use proyecto\Models\Clientes;
-use proyecto\Models\Meseros;
 use proyecto\Models\Categorias;
 use proyecto\Models\Comida;
 use proyecto\Models\Ingredientes;
@@ -38,8 +38,52 @@ use proyecto\Models\DetalleOrden;
 use proyecto\Models\Pedidos;
 use proyecto\Models\DetallePedido;
 use proyecto\Controller\EmpleadosController;
+use proyecto\Controller\PlatillosController;
+use proyecto\Controller\ComidaController;
+use proyecto\Controller\BebidasController;
+use proyecto\Controller\PostresController;
+use proyecto\Controller\IngredientesController;
+
 
 // Otras rutas y configuraciones...
+
+
+// Ruta para obtener ingredientes por platillo
+Router::get('/ingredientes', function() {
+    $platilloID = $_GET['platilloID'];
+    $controller = new IngredientesController();
+    $ingredientes = $controller->getIngredientesPorPlatillo($platilloID);
+    echo json_encode($ingredientes);
+});
+
+
+Router::get('/comida', function() {
+    $controller = new ComidaController();
+    $comida = $controller->getComida();
+    echo json_encode($comida);
+});
+
+// Ruta para obtener las bebidas
+Router::get('/bebidas', function() {
+    $controller = new BebidasController();
+    $bebidas = $controller->getBebidas();
+    echo json_encode($bebidas);
+});
+
+// Ruta para obtener los postres
+Router::get('/postres', function() {
+    $controller = new PostresController();
+    $postres = $controller->getPostres();
+    echo json_encode($postres);
+});
+
+
+// Ruta para obtener los platillos
+Router::get('/getPlatillos', function() {
+    $controller = new PlatillosController();
+    $platillos = $controller->getPlatillos();
+    echo json_encode($platillos);
+});
 
 // Ruta para registrar un empleado
 Router::post('/register', function() {
@@ -70,17 +114,36 @@ Router::post('/crearcliente', function() {
     echo json_encode(["message" => $message]);
 });
 
+// Ruta para obtener la información de los chefs
 Router::get('/chefs', function() {
     $controller = new ChefsController();
     $chefs = $controller->getChefsInfo();
     echo json_encode($chefs);
 });
 
+// Ruta para obtener la información de los meseros
 Router::get('/meseros', function() {
     $controller = new MeserosController();
     $meseros = $controller->getMeserosInfo();
     echo json_encode($meseros);
 });
+
+// Ruta para eliminar un chef
+Router::post('/deletechef', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $controller = new ChefsController();
+    $message = $controller->deleteChef($data['usuarioID']); // Asegúrate de que usuarioID se está pasando correctamente
+    echo json_encode(["message" => $message]);
+});
+
+// Ruta para eliminar un mesero
+Router::post('/deletemesero', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $controller = new MeserosController();
+    $message = $controller->deleteMesero($data['usuarioID']); // Asegúrate de que usuarioID se está pasando correctamente
+    echo json_encode(["message" => $message]);
+});
+
 
 Router::get('/verificarcorreo', function() {
     $correo = $_GET['correo'];

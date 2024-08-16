@@ -37,25 +37,45 @@ class User extends Models
 
 
 
-    public static function auth($user, $contrasena):Response
-    {
-        $class = get_called_class();
-        $c = new $class();
-        $stmt = self::$pdo->prepare("select *  from $c->table  where  user =:user  and contrasena=:contrasena");
-        $stmt->bindParam(":user", $user);
-        $stmt->bindParam(":contrasena", $contrasena);
+    public static function auth($correo, $contrasena)
+{
+    $class = get_called_class();
+    $c = new $class();
+
+    // Define la clave de encriptación utilizada para AES
+    $clave_encriptacion = 'BARBAROS'; // Asegúrate de que coincida con la clave utilizada en el procedimiento almacenado
+
+    try {
+        // Consulta SQL para autenticar al usuario utilizando su nombre completo
+        $stmt = self::$pdo->prepare("
+            SELECT
+                Personas.Nombre,        -- Nombre completo del usuario
+                Usuarios.Correo,                -- Correo electrónico del usuario
+                Usuarios.ID_U,       -- ID del usuario
+                CONVERT(AES_DECRYPT(Usuarios.Contraseña, :clave_encriptacion) AS CHAR) as Contrasena
+            FROM {$c->table} Usuarios
+            INNER JOIN Personas  ON Usuarios.UsuarioID = Personas.UsuarioID
+            WHERE Usuarios.correo = :correo
+        ");
+
+        $stmt->bindParam(':correo', $correo);
+        $stmt->bindParam(':clave_encriptacion', $clave_encriptacion);
         $stmt->execute();
-        $resultados = $stmt->fetchAll(PDO::FETCH_CLASS,User::class);
 
-        if ($resultados) {
-//            Auth::setUser($resultados[0]);  pendiente
-            $r=new Success(["usuario"=>$resultados[0],"_token"=>Auth::generateToken([$resultados[0]->id])]);
-           return  $r->Send();
+        $resultado = $stmt->fetch(PDO::FETCH_OBJ);
+
+        if ($resultado && $resultado->Contrasena === $Contrasena) {
+            // Usuario encontrado, retornar éxito con datos completos
+            return [
+                'success' => true,
+                'usuario' => [
+                    'Nombre' => $resultado->Nombre,
+                    'Correo' => $resultado->Correo,
+                    'UsuarioID' => $resultado->UsuarioID
+                ],
+                '_token' => Auth::generateToken([$resultado->UsuarioID])
+            ];
         }
-        $r=new Failure(401,"Usuario o contraseña incorrectos");
-        return $r->Send();
-
-    }
 
     public function find_name($name)
     {

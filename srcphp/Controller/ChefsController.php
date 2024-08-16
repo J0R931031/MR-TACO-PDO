@@ -11,7 +11,7 @@ class ChefsController
 
     public function __construct()
     {
-        $cc = new Conexion("mrtacotrc", "localhost", "root", "12345678");
+        $cc = new Conexion("mrtacotrc", "localhost", "root", "1234");
         $this->pdo = $cc->getPDO();
     }
 
@@ -23,6 +23,25 @@ class ChefsController
             $chefs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             return $chefs;
+
+        } catch (\PDOException $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+
+    public function deleteChef($usuarioID)
+    {
+        try {
+            // Ejecutar el procedimiento almacenado para eliminar un chef
+            $stmt = $this->pdo->prepare("CALL DeleteEmployee(:usuarioID, @message)");
+            $stmt->bindParam(':usuarioID', $usuarioID, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Obtener el mensaje de salida del procedimiento almacenado
+            $outputStmt = $this->pdo->query("SELECT @message AS message")->fetch(PDO::FETCH_ASSOC);
+            $message = $outputStmt['message'];
+
+            return $message;
 
         } catch (\PDOException $e) {
             return "Error: " . $e->getMessage();
