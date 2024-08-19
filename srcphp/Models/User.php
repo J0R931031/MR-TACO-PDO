@@ -2,101 +2,66 @@
 
 namespace proyecto\Models;
 
-
 use PDO;
 use proyecto\Auth;
 use proyecto\Response\Failure;
-use proyecto\Response\Response;
 use proyecto\Response\Success;
-use function json_encode;
 
 class User extends Models
 {
+    protected $table = "usuarios";
 
-    public $user = "";
-    public $contrasena = "";
-    public $nombre = "";
-    public $edad = "";
-    public $correo = "";
-    public $apellido = "";
+    public static function auth($usuario, $contrasena)
+    {
+        $class = get_called_class();
+        $c = new $class();
 
-    public $id = "";
+        // Clave de encriptación que usas en la base de datos
+        $clave_encriptacion = 'BARBAROSIDAD';
 
-    /**
-     * @var array
-     */
-    protected $filleable = [
-        "nombre",
-        "edad",
-        "correo",
-        "apellido",
-        "contrasena",
-        "user"
-    ];
-    protected    $table = "usuarios";
+        try {
+            // Consulta para autenticar al usuario con AES_DECRYPT
+            $stmt = self::$pdo->prepare("
+                SELECT
+                    Personas.Nombre AS Nombre,
+                    Usuarios.Usuario AS Usuario,
+                    CAST(AES_DECRYPT(Usuarios.Contrasena, :clave_encriptacion) AS CHAR) as Contrasena,
+                    Usuarios.ID_U AS ID_U
+                FROM {$c->table} Usuarios
+                INNER JOIN Personas ON Usuarios.ID_U = Personas.UsuarioID
+                WHERE Usuarios.Usuario = :usuario
+            ");
 
+            $stmt->bindParam(':usuario', $usuario);
+            $stmt->bindParam(':clave_encriptacion', $clave_encriptacion);
+            $stmt->execute();
 
+            $resultado = $stmt->fetch(PDO::FETCH_OBJ);
 
-    public static function auth($correo, $contrasena)
-{
-    $class = get_called_class();
-    $c = new $class();
-
-    // Define la clave de encriptación utilizada para AES
-    $clave_encriptacion = 'BARBAROS'; // Asegúrate de que coincida con la clave utilizada en el procedimiento almacenado
-
-    try {
-        // Consulta SQL para autenticar al usuario utilizando su nombre completo
-        $stmt = self::$pdo->prepare("
-            SELECT
-                Personas.Nombre,        -- Nombre completo del usuario
-                Usuarios.Correo,                -- Correo electrónico del usuario
-                Usuarios.ID_U,       -- ID del usuario
-                CONVERT(AES_DECRYPT(Usuarios.Contraseña, :clave_encriptacion) AS CHAR) as Contrasena
-            FROM {$c->table} Usuarios
-            INNER JOIN Personas  ON Usuarios.UsuarioID = Personas.UsuarioID
-            WHERE Usuarios.correo = :correo
-        ");
-
-        $stmt->bindParam(':correo', $correo);
-        $stmt->bindParam(':clave_encriptacion', $clave_encriptacion);
-        $stmt->execute();
-
-        $resultado = $stmt->fetch(PDO::FETCH_OBJ);
-
-        if ($resultado && $resultado->Contrasena === $Contrasena) {
-            // Usuario encontrado, retornar éxito con datos completos
+            if ($resultado && $resultado->Contrasena === $contrasena) {
+                // Usuario autenticado correctamente
+                return [
+                    'success' => true,
+                    'usuario' => [
+                        'Nombre' => $resultado->Nombre,
+                        'Usuario' => $resultado->Usuario,
+                        'ID_U' => $resultado->ID_U
+                    ],
+                    '_token' => Auth::generateToken([$resultado->ID_U])
+                ];
+            } else {
+                // Credenciales incorrectas
+                return [
+                    'success' => false,
+                    'msg' => 'Credenciales incorrectas'
+                ];
+            }
+        } catch (\PDOException $e) {
+            // Error en la base de datos
             return [
-                'success' => true,
-                'usuario' => [
-                    'Nombre' => $resultado->Nombre,
-                    'Correo' => $resultado->Correo,
-                    'UsuarioID' => $resultado->UsuarioID
-                ],
-                '_token' => Auth::generateToken([$resultado->UsuarioID])
+                'success' => false,
+                'msg' => 'Error en el proceso de autenticación: ' . $e->getMessage()
             ];
         }
-
-    public function find_name($name)
-    {
-        $stmt = self::$pdo->prepare("select *  from $this->table  where  nombre=:name");
-        $stmt->bindParam(":name", $name);
-        $stmt->execute();
-        $resultados = $stmt->fetchAll(PDO::FETCH_OBJ);
-        if ($resultados == null) {
-            return json_encode([]);
-        }
-        return json_encode($resultados[0]);
     }
-
-    public  function reportecitas(){
-        $JSONData = file_get_contents("php://input");
-        $dataObject = json_decode($JSONData);
-
-        $name=$dataObject->name;
-        $d=Table::query("select * from users  where name='".$name."'");
-        $r=new Success($d);
-
-    }
-
 }

@@ -17,6 +17,7 @@ use proyecto\Controller\ClientesController;
 use proyecto\Controller\ChefsController;
 use proyecto\Controller\MeserosController;
 use proyecto\Models\User;
+use proyecto\MOdels\EstadoReserva;
 use proyecto\Response\Failure;
 use proyecto\Response\Success;
 use proyecto\Models\Usuarios;
@@ -24,7 +25,6 @@ use proyecto\Models\Roles;
 use proyecto\Models\RolUsuario;
 use proyecto\Models\Personas;
 use proyecto\Models\Horarios;
-use proyecto\Models\EstadoDeReservas;
 use proyecto\Models\Comentarios;
 use proyecto\Models\Clientes;
 use proyecto\Models\Categorias;
@@ -43,19 +43,91 @@ use proyecto\Controller\ComidaController;
 use proyecto\Controller\BebidasController;
 use proyecto\Controller\PostresController;
 use proyecto\Controller\IngredientesController;
+use proyecto\Controller\EstadoComidaController;
+use proyecto\Controller\EstadoIngredientesController;
+use proyecto\Controller\EstadoReservaController;
+use proyecto\Controller\ReservaController;
 
+// index.php o archivo de rutas
+Router::post('/login', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $usuario = $data['usuario'];
+    $contrasena = $data['contrasena'];
 
-// Otras rutas y configuraciones...
+    $response = User::auth($usuario, $contrasena);
 
+    echo json_encode($response);
+});
+
+// Ruta para obtener las reservas
+Router::get('/reservas', function() {
+    $controller = new ReservaController();
+    $reservas = $controller->obtenerReservas();
+    echo json_encode($reservas);
+});
+
+// Ruta para cambiar el estado de la reserva
+Router::post('/estadoreservas/cambiarEstado', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $reservaId = $data['reservaId'];
+
+    $controller = new EstadoReservaController();
+    $response = $controller->cambiarEstadoReserva($reservaId);
+
+    echo json_encode($response);
+});
+
+// Ruta para obtener el estado de las reservas
+Router::get('/estadoreservas', function() {
+    $controller = new EstadoReservaController();
+    $reservas = $controller->obtenerEstadoReservas();
+
+    echo json_encode($reservas);
+});
 
 // Ruta para obtener ingredientes por platillo
+
+// Ruta para obtener los ingredientes
 Router::get('/ingredientes', function() {
-    $platilloID = $_GET['platilloID'];
-    $controller = new IngredientesController();
-    $ingredientes = $controller->getIngredientesPorPlatillo($platilloID);
+    $controller = new EstadoIngredientesController();
+    $ingredientes = $controller->obtenerIngredientes();
     echo json_encode($ingredientes);
 });
 
+// Ruta para cambiar el estado de un ingrediente
+Router::post('/ingredientes/cambiarEstado', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $ingredienteId = $data['ingredienteId'];
+
+    $controller = new EstadoIngredientesController();
+    $response = $controller->cambiarEstadoIngrediente($ingredienteId);
+
+    echo json_encode($response);
+});
+
+Router::post('/comidas/cambiarEstado', function() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $comidaId = $data['comidaId'];
+    
+    $controller = new EstadoComidaController();
+    $response = $controller->cambiarEstadoComida($comidaId);
+    
+    echo json_encode($response);
+});
+
+Router::get('/comidas', function() {
+    $controller = new EstadoComidaController();
+    $comida = $controller->obtenerComida();
+    
+    echo json_encode($comida);
+});
+
+Router::get('/ingrediente', function() {
+    $controller = new IngredientesController();
+    $ingredientes = $controller->obtenerIngredientes();
+
+    echo json_encode($ingredientes);
+});
 
 Router::get('/comida', function() {
     $controller = new ComidaController();
@@ -191,7 +263,8 @@ Router::get('/usuario/buscar/$id', function ($id) {
     return $r->Send();
 });
 
-Router::any('/404', '../views/404.php');
+Router::get('/404', '../views/404.php');
+
 
 route::get ("/p", function(){
     echo "Hola";
